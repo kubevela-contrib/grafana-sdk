@@ -39,6 +39,7 @@ const (
 	BarGaugeType
 	GaugeType
 	HeatmapType
+	TableOldType
 )
 
 const MixedSource = "-- Mixed --"
@@ -61,6 +62,7 @@ type (
 		*BarGaugePanel
 		*GaugePanel
 		*HeatmapPanel
+		*TableOldPanel
 		*CustomPanel
 	}
 	panelType   int8
@@ -179,6 +181,10 @@ type (
 		CommonPanel
 		Targets []Target      `json:"targets,omitempty"`
 		Styles  []ColumnStyle `json:"styles"`
+	}
+	TableOldPanel struct {
+		CommonPanel
+		Targets []Target `json:"targets,omitempty"`
 	}
 	Options struct {
 		Orientation   string `json:"orientation"`
@@ -986,6 +992,12 @@ func (p *Panel) UnmarshalJSON(b []byte) (err error) {
 			if err = json.Unmarshal(b, &rowpanel); err == nil {
 				p.RowPanel = &rowpanel
 			}
+		case "table-old":
+			var tableOldPanel TableOldPanel
+			p.OfType = TableOldType
+			if err = json.Unmarshal(b, &tableOldPanel); err == nil {
+				p.TableOldPanel = &tableOldPanel
+			}
 		default:
 			var custom = make(CustomPanel)
 			p.OfType = CustomType
@@ -1071,6 +1083,12 @@ func (p *Panel) MarshalJSON() ([]byte, error) {
 			HeatmapPanel
 		}{p.CommonPanel, *p.HeatmapPanel}
 		return json.Marshal(outHeatmap)
+	case TableOldType:
+		var outTableOld = struct {
+			CommonPanel
+			TableOldPanel
+		}{p.CommonPanel, *p.TableOldPanel}
+		return json.Marshal(outTableOld)
 	case CustomType:
 		var outCustom = struct {
 			CommonPanel
