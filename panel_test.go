@@ -695,3 +695,117 @@ func TestPanel_Stackdriver_ParsedTargets(t *testing.T) {
 		t.Fatalf("should be \"pubsub.googleapis.com/subscription/ack_message_count\" but is not")
 	}
 }
+
+func TestStatPanel(t *testing.T) {
+	var statPanel = []byte(`{
+      "datasource": "prometheus",
+      "description": "Connectivity between the managed cluster and the control plane",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "down"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "up"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "orange",
+                  "index": 2,
+                  "text": "down"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              },
+              {
+                "color": "semi-dark-green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.5",
+      "targets": [
+        {
+          "exemplar": false,
+          "expr": "cluster_isconnected{cluster=~\"$cluster\"}",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Connectivity",
+      "type": "stat"
+    }`)
+
+	var stat sdk.Panel
+	err := json.Unmarshal(statPanel, &stat)
+
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	if stat.StatPanel.FieldConfig.Defaults.Color.Mode != "thresholds" {
+		t.Fatalf("parse StatPanel.FieldConfig.Defaults.Color.Mode failed")
+	}
+
+	if len(stat.StatPanel.FieldConfig.Defaults.Mappings) != 2 {
+		t.Fatalf("parse StatPanel.FieldConfig.Defaults.Mappings failed")
+	}
+
+	if len(stat.StatPanel.FieldConfig.Defaults.Thresholds.Steps) != 2 {
+		t.Fatalf("parse StatPanel.FieldConfig.Defaults.Thresholds.Steps failed")
+	}
+
+	if stat.StatPanel.FieldConfig.Defaults.Thresholds.Mode != "absolute" {
+		t.Fatalf("parse StatPanel.FieldConfig.Defaults.Thresholds.Mode failed")
+	}
+}
