@@ -169,20 +169,41 @@ type (
 	}
 	FieldConfig struct {
 		Defaults struct {
-			Unit      string `json:"unit"`
-			Threshold struct {
+			Unit       string `json:"unit,omitempty"`
+			Thresholds struct {
 				Mode  string `json:"mode"`
 				Steps []struct {
-					Color string `json:"color"`
-					Value string `json:"value"`
+					Color string `json:"color,omitempty"`
+					Value int    `json:"value,omitempty"`
 				} `json:"steps"`
-			} `json:"threshold"`
+			} `json:"thresholds,omitempty"`
+			Mappings []MappingsOptions `json:"mappings,omitempty"`
+			Color    struct {
+				Mode string `json:"mode,omitempty"`
+			} `json:"color,omitempty"`
+			Max int `json:"max,omitempty"`
+			Min int `json:"min,omitempty"`
 		} `json:"defaults"`
+	}
+	MappingsOptions struct {
+		Type    string `json:"type"`
+		Options struct {
+			Match  string `json:"match"`
+			Result Result `json:"result,omitempty"`
+			Zero   Result `json:"0,omitempty"`
+			One    Result `json:"1,omitempty"`
+		} `json:"options"`
+	}
+	Result struct {
+		Color string `json:"color,omitempty"`
+		Index int    `json:"index,omitempty"`
+		Text  string `json:"text,omitempty"`
 	}
 	GaugePanel struct {
 		CommonPanel
-		Targets []Target      `json:"targets,omitempty"`
-		Styles  []ColumnStyle `json:"styles"`
+		Targets     []Target      `json:"targets,omitempty"`
+		Styles      []ColumnStyle `json:"styles"`
+		FieldConfig FieldConfig   `json:"fieldConfig,omitempty"`
 	}
 	TableOldPanel struct {
 		CommonPanel
@@ -282,6 +303,7 @@ type (
 		ColorValue      bool        `json:"colorValue"`
 		ColorBackground bool        `json:"colorBackground"`
 		Decimals        int         `json:"decimals"`
+		FieldConfig     FieldConfig `json:"fieldConfig,omitempty"`
 		Format          string      `json:"format"`
 		Gauge           Gauge       `json:"gauge,omitempty"`
 		MappingType     *uint       `json:"mappingType,omitempty"`
